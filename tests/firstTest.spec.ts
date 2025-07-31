@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("http://localhost:4200/");
@@ -61,6 +61,12 @@ test("user facing locators", async ({ page }) => {
 });
 
 test("locating child elements", async ({ page }) => {
+  const newLocal = "Remember me";
+  await page
+    .locator("nb-card", { hasText: "Horizontal form" })
+    .locator("nb-checkbox")
+    .click();
+
   await page.locator('nb-card nb-radio :text-is("Option 1")').click();
   await page
     .locator("nb-card")
@@ -75,11 +81,133 @@ test("locating child elements", async ({ page }) => {
     .first()
     .click();
 
-    await page
-    .locator("nb-card").nth(3)
-    .getByRole("button", { name: "SIGN IN" })
-    .click();
+  // await page
+  //   .locator("nb-card")
+  //   .nth(3)
+  //   .getByRole("button", { name: "SIGN IN" })
+  //   .click();
 });
+
+test("locating parent elements", async ({ page }) => {
+  // Both Same
+  await page
+    .locator("nb-card", { hasText: "Using the Grid" })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  await page
+    .locator("nb-card")
+    .filter({ hasText: "Using the Grid" })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  // Both Same
+  await page
+    .locator("nb-card", { has: page.locator("#inputEmail1") })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  await page
+    .locator("nb-card")
+    .filter({ has: page.locator("#inputEmail1") })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  // Both Same
+  await page
+    .locator("nb-card", { hasText: "Basic form" })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  await page
+    .locator("nb-card")
+    .filter({ hasText: "Basic form" })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  // Both Same
+  await page
+    .locator("nb-card", { has: page.locator("#exampleInputEmail1") })
+    .getByRole("textbox", { name: "email" })
+    .click();
+  await page
+    .locator("nb-card")
+    .filter({ has: page.locator("#exampleInputEmail1") })
+    .getByRole("textbox", { name: "email" })
+    .click();
+
+  await page
+    .locator("nb-card")
+    .filter({ hasText: "Horizontal form" })
+    .getByRole("textbox", { name: "email" })
+    .click();
+
+  await page
+    .locator("nb-card")
+    .filter({ has: page.locator("nb-checkbox") })
+    .filter({ hasText: "Sign In" })
+    .getByRole("button")
+    .click();
+
+  // to get out one level from target
+
+  await page
+    .locator(':text-is("Using the Grid")')
+    .locator("..")
+    .getByRole("textbox", { name: "email" })
+    .click();
+
+  // await page
+  // .locator("nb-card").locator('nb-card-body')
+  // .locator("form",{has:page.locator('.form-horizontal')})
+  // .getByRole("textbox", { name: "email" })
+  // .click();
+});
+
+test("reusing the locators", async ({ page }) => {
+  const baseForm = page.locator("nb-card", { hasText: "Block form" });
+  const firstName = baseForm.getByRole("textbox", { name: "First Name" });
+  const lastName = baseForm.getByRole("textbox", { name: "Last Name" });
+  const email = baseForm.getByRole("textbox", { name: "Email" });
+  const Website = baseForm.getByRole("textbox", { name: "Website" });
+
+  await firstName.fill("mohamed Salahudeen");
+  await lastName.fill("Jamaldeen");
+  await email.fill("abc@123.com");
+  await Website.fill("456ujn");
+  await baseForm.getByRole("button").filter({ hasText: "SUBMIT" }).click();
+
+  await expect(firstName).toHaveValue("mohamed Salahudeen");
+  await expect(lastName).toHaveValue("Jamaldeen");
+  await expect(email).toHaveValue("abc@123.com");
+  await expect(Website).toHaveValue("456ujn");
+});
+
+test("extracting Values", async ({ page }) => {
+  //single text value
+  const basicForm = page.locator("nb-card", { hasText: "Basic form" });
+  const button = await basicForm.locator("button").textContent();
+  expect(button).toEqual("Submit");
+
+  //all text values
+  const allRadioButtonValues = await page.locator("nb-radio").allTextContents();
+  expect(allRadioButtonValues).toContain("Option 1");
+
+  // input values
+  const emailField = basicForm.getByRole("textbox", { name: "Email" });
+  await emailField.fill("Sala123@gmail.com");
+  await expect(emailField).toHaveValue("Sala123@gmail.com");
+  // <<<<<<OR>>>>>
+  const emailVal = await emailField.inputValue();
+  expect(emailVal).toEqual("Sala123@gmail.com");
+
+  const placeholderValue = await emailField.getAttribute("placeholder");
+  expect(placeholderValue).toEqual("Email");
+
+  const blockForm = page.locator("nb-card", { hasText: "Form without labels" });
+
+  const recipient = blockForm.getByRole("textbox", { name: "Recipients" });
+
+  await recipient.fill("Sachin Tendulkar");
+
+  const recipientVal = await recipient.inputValue();
+  expect(recipientVal).toEqual("Sachin Tendulkar");
+});
+
 //To Group
 // test.describe("Group tests1", () => {
 //   test("first test", () => {});
