@@ -208,6 +208,28 @@ test("extracting Values", async ({ page }) => {
   expect(recipientVal).toEqual("Sachin Tendulkar");
 });
 
+// ASSERTIONS
+test("Assertions", async ({ page }) => {
+  //General Assertion did not wait
+  const basicFormButton = page
+    .locator("nb-card", { hasText: "Basic form" })
+    .locator("button");
+  const text = basicFormButton.textContent();
+  expect(text).toEqual('Submit');
+
+  // Locator Assertion ==> wait for 5 secs to finish 
+  await expect(basicFormButton).toHaveText('Submit');
+
+  //Soft Assertion ==> will continue even the assertion fails
+  await expect.soft(basicFormButton).toHaveText('Submit');
+  await basicFormButton.click(); //==> will get executed even though above assertion fails
+});
+
+// Auto Waiting 
+test('Auto Waiting',async ({page})=>{
+
+})
+
 //To Group
 // test.describe("Group tests1", () => {
 //   test("first test", () => {});
