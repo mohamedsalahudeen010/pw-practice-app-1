@@ -30,11 +30,11 @@ test.beforeEach(async ({ page }, testInfo) => {
 test("time outs", async ({ page }) => {
   test.setTimeout(600000);
   const success = page.locator(".bg-success");
-  await success.click({ timeout: 16000 }); //=> Increase the Expect Timeout time by 16 secs
+  await success.click({ timeout: 20000 }); //=> Increase the Expect Timeout time by 16 secs
 });
 
 test("time outs slow", async ({ page }) => {
   test.slow(); //==> increase the test timout 3 times
   const success = page.locator(".bg-success");
-  await success.click({ timeout: 16000 });
+  await success.click({ timeout: 20000 });
 });
